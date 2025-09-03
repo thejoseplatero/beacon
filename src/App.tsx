@@ -12,7 +12,7 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hi! I'm Beacon, your AI assistant. Ask me anything about your app, code, or technical questions.",
+      text: "Hello! Welcome to Beacon. How can I help you today?",
       sender: 'bot',
       timestamp: new Date()
     }
@@ -42,7 +42,8 @@ function App() {
     <div className="App">
       <div className="chat-container">
         <div className="chat-header">
-          <h1 className="app-title">beacon</h1>
+          <h1>Beacon</h1>
+          <p>Simple Chat Interface</p>
         </div>
         
         <div className="messages-container">
@@ -53,6 +54,9 @@ function App() {
             >
               <div className="message-content">
                 <p>{message.text}</p>
+                <span className="timestamp">
+                  {message.timestamp.toLocaleTimeString()}
+                </span>
               </div>
             </div>
           ))}
@@ -64,7 +68,7 @@ function App() {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Reply to beacon..."
+            placeholder="Type your message..."
             className="message-input"
           />
           <button 
@@ -72,15 +76,7 @@ function App() {
             className="send-button"
             disabled={!inputText.trim()}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2Z"/>
-            </svg>
-          </button>
-          <button className="settings-button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
+            Send
           </button>
         </div>
       </div>
