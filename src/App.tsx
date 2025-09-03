@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 // Data Models
@@ -224,7 +224,35 @@ function App() {
   ]);
   const [inputText, setInputText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const commandParser = new CommandParser();
+
+  const checkScrollPosition = () => {
+    if (messagesContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10;
+      setShowScrollIndicator(!isAtBottom);
+    }
+  };
+
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', checkScrollPosition);
+      checkScrollPosition();
+      return () => container.removeEventListener('scroll', checkScrollPosition);
+    }
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   const handleSendMessage = async () => {
     if (inputText.trim() && !isProcessing) {
@@ -378,29 +406,37 @@ function App() {
         </div>
       </div>
       
-      <div className="chat-container">
-        <div className="messages-container">
-          {messages.map((message) => (
-            <div 
-              key={message.id} 
-              className={`message ${message.sender === 'user' ? 'user-message' : 'bot-message'}`}
-            >
-              <div className="message-content">
-                {renderMessage(message)}
-                <span className="timestamp">
-                  {message.timestamp.toLocaleTimeString()}
-                </span>
+                  <div className="chat-container">
+              <div className="messages-container" ref={messagesContainerRef}>
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`message ${message.sender === 'user' ? 'user-message' : 'bot-message'}`}
+                  >
+                    <div className="message-content">
+                      {renderMessage(message)}
+                      <span className="timestamp">
+                        {message.timestamp.toLocaleTimeString()}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+                {isProcessing && (
+                  <div className="message bot-message">
+                    <div className="message-content">
+                      <div className="loading">Processing...</div>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
-          {isProcessing && (
-            <div className="message bot-message">
-              <div className="message-content">
-                <div className="loading">Processing...</div>
-              </div>
-            </div>
-          )}
-        </div>
+              
+              {showScrollIndicator && (
+                <div className="scroll-indicator" onClick={scrollToBottom}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
+                  </svg>
+                </div>
+              )}
         
         <div className="input-container">
           <input
