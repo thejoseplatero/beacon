@@ -29,7 +29,7 @@
 
 .beacon-logo {
   margin: 0;
-  font-size: 1.8rem;
+  font-size: 1.4rem;
   font-weight: 700;
   background: linear-gradient(135deg, #a855f7 0%, #8b5cf6 50%, #7c3aed 100%);
   background-size: 200% 200%;
@@ -38,7 +38,18 @@
   background-clip: text;
   animation: shimmer 3s ease-in-out infinite, pulse 4s ease-in-out infinite;
   letter-spacing: -0.5px;
-  text-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
+  text-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.beacon-logo:hover {
+  text-shadow: 
+    0 0 30px rgba(168, 85, 247, 0.6),
+    0 0 60px rgba(168, 85, 247, 0.4),
+    0 0 90px rgba(168, 85, 247, 0.2);
+  transform: scale(1.05);
+  filter: brightness(1.2);
 }
 
 @keyframes shimmer {
