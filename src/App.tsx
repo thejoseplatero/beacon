@@ -187,6 +187,7 @@ class CommandParser {
   async parseCommand(input: string): Promise<{ type: string; response: any }> {
     const lowerInput = input.toLowerCase();
     
+    // System commands
     if (lowerInput.startsWith('/insights')) {
       const query = input.substring(9).trim();
       const insights = await this.beaconService.getInsights(query);
@@ -205,10 +206,41 @@ class CommandParser {
       return { type: 'decision', response: decision };
     }
     
-    // Default response for general questions
+    // Natural language processing
+    if (lowerInput.includes('insight') || lowerInput.includes('data') || lowerInput.includes('analytics')) {
+      const insights = await this.beaconService.getInsights(input);
+      return { type: 'insight', response: insights };
+    }
+    
+    if (lowerInput.includes('prioritize') || lowerInput.includes('opportunity') || lowerInput.includes('rank') || lowerInput.includes('what should we do')) {
+      const opportunities = await this.beaconService.prioritizeOpportunities(input);
+      return { type: 'opportunity', response: opportunities };
+    }
+    
+    if (lowerInput.includes('decision') || lowerInput.includes('choose') || lowerInput.includes('option')) {
+      const decision = await this.beaconService.createDecisionCard('opp-1');
+      return { type: 'decision', response: decision };
+    }
+    
+    // General conversation
+    if (lowerInput.includes('hello') || lowerInput.includes('hi') || lowerInput.includes('hey')) {
+      return {
+        type: 'text',
+        response: "Hello! I'm Beacon, your marketing co-pilot. I can help you with insights, prioritization, and decision-making. What would you like to explore?"
+      };
+    }
+    
+    if (lowerInput.includes('help') || lowerInput.includes('what can you do')) {
+      return {
+        type: 'text',
+        response: "I can help you with:\n\n• **Data Insights** - Ask about performance, trends, or specific metrics\n• **Opportunity Prioritization** - Get recommendations on what to focus on\n• **Decision Making** - Create decision cards with options and tradeoffs\n\nTry asking naturally or use commands like /insights, /prioritize, or /decision"
+      };
+    }
+    
+    // Default response for unrecognized input
     return {
       type: 'text',
-      response: "I'm Beacon, your marketing co-pilot. Try commands like:\n• /insights [query] - Get data insights\n• /prioritize [criteria] - Rank opportunities\n• /decision [id] - Create decision card"
+      response: "I understand you're asking about something, but I'm not sure how to help with that specific request. I can help with:\n\n• Data insights and analytics\n• Opportunity prioritization\n• Decision-making frameworks\n\nTry rephrasing or ask for help to see what I can do!"
     };
   }
 }
@@ -217,7 +249,7 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hi! I'm Beacon, your marketing co-pilot. I help you connect performance data and customer feedback into clear priorities. Try:\n\n• /insights checkout 30d\n• /prioritize conversion\n• /decision opp-1",
+      text: "Hi! I'm Beacon, your marketing co-pilot. I help you connect performance data and customer feedback into clear priorities.\n\nYou can ask me naturally or use commands:\n• \"Show me insights about checkout\"\n• \"What should we prioritize?\"\n• \"/insights checkout 30d\"",
       sender: 'bot',
       timestamp: new Date()
     }
