@@ -426,28 +426,29 @@ function App() {
       let prompt = `You are Beacon, a marketing co-pilot AI assistant. You help analyze marketing data and provide insights.`;
       prompt += `\n\nUser question: ${input}\n\nPlease provide a helpful, analytical response based on the uploaded files.`;
       
-      // Create parts array for Gemini with text and files
-      const parts: any[] = [{ text: prompt }];
-      
+      // For now, let's use the text-based approach with file content
       if (files && files.length > 0) {
+        prompt += `\n\nYou have access to the following uploaded files:\n`;
         for (const file of files) {
-          if (file.file) {
-            // Convert file to base64 for Gemini
-            const arrayBuffer = await file.file.arrayBuffer();
-            const uint8Array = new Uint8Array(arrayBuffer);
-            const base64 = btoa(String.fromCharCode.apply(null, Array.from(uint8Array)));
-            
-            parts.push({
-              inlineData: {
-                data: base64,
-                mimeType: file.type === 'pdf' ? 'application/pdf' : 'text/csv'
+          if (file.type === 'csv' && file.content) {
+            prompt += `\nCSV File: ${file.name}\nContent:\n${file.content}\n`;
+          } else if (file.type === 'pdf') {
+            // For PDFs, we'll extract text content first
+            if (file.file) {
+              try {
+                // Try to read as text first (works for some PDFs)
+                const text = await file.file.text();
+                prompt += `\nPDF File: ${file.name}\nContent:\n${text}\n`;
+              } catch (error) {
+                // If text extraction fails, inform Gemini about the PDF
+                prompt += `\nPDF File: ${file.name} - This is a PDF document that needs to be analyzed. Please provide insights based on the PDF content.\n`;
               }
-            });
+            }
           }
         }
       }
       
-      const result = await model.generateContent(parts);
+      const result = await model.generateContent(prompt);
       const response = await result.response;
       return response.text();
     } catch (error) {
