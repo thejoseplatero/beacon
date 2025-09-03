@@ -1,3 +1,14 @@
+/* Base responsive improvements */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
 .App {
   text-align: center;
   height: 100vh;
@@ -725,20 +736,166 @@
 
 /* Responsive design */
 @media (max-width: 768px) {
-  .chat-container {
-    margin: 10px;
-    border-radius: 15px 15px 0 0;
+  .App {
+    padding: 0;
+    margin: 0;
   }
-  
+
   .app-header {
     height: 50px;
+    padding: 0 15px;
   }
-  
+
   .beacon-logo {
-    font-size: 1.5rem;
+    font-size: 1rem;
+  }
+
+  .chat-container {
+    margin: 10px;
+    border-radius: 15px;
+    max-width: none;
+    width: calc(100% - 20px);
+  }
+
+  .messages-container {
+    padding: 15px 0;
+    gap: 10px;
+  }
+
+  .message {
+    padding: 0 15px;
+  }
+
+  .user-message .message-content {
+    max-width: 85%;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+
+  .bot-message .message-content {
+    font-size: 0.85rem;
+    padding: 6px 0;
+  }
+
+  .input-container {
+    padding: 15px;
+    gap: 8px;
+  }
+
+  .message-input {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+
+  .send-button {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+
+  .scroll-indicator {
+    bottom: 70px;
+    right: 15px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .scroll-indicator svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Card responsiveness */
+  .kpi-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .opportunity-card {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .opp-metrics {
+    gap: 8px;
+  }
+
+  .metric {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+  }
+
+  .insight-card h3,
+  .opportunities-list h3,
+  .decision-card h3 {
+    font-size: 0.9rem;
+  }
+
+  .insight-card p,
+  .opportunity-card p,
+  .decision-card p {
+    font-size: 0.8rem;
+  }
+
+  /* Touch-friendly improvements */
+  .send-button {
+    touch-action: manipulation;
   }
   
-  .message-content {
+  .scroll-indicator {
+    touch-action: manipulation;
+  }
+  
+  .message-input {
+    touch-action: manipulation;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-container {
+    margin: 5px;
+    width: calc(100% - 10px);
+    border-radius: 12px;
+  }
+
+  .messages-container {
+    padding: 10px 0;
+  }
+
+  .message {
+    padding: 0 10px;
+  }
+
+  .user-message .message-content {
     max-width: 90%;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  .input-container {
+    padding: 12px;
+  }
+
+  .message-input {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+
+  .send-button {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+  }
+
+  .scroll-indicator {
+    bottom: 65px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .scroll-indicator svg {
+    width: 14px;
+    height: 14px;
   }
 }
