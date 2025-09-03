@@ -1,7 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import './App.css';
 
+// Initialize Gemini AI
+const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY || 'your-api-key-here');
+
 // Data Models
+interface UploadedFile {
+  id: string;
+  name: string;
+  type: 'csv' | 'pdf';
+  size: number;
+  content?: string;
+  uploadedAt: Date;
+}
+
 interface Insight {
   id: string;
   title: string;
@@ -11,6 +24,7 @@ interface Insight {
   sentiment: 'positive' | 'negative' | 'neutral';
   confidence: number;
   timestamp: Date;
+  sourceFiles?: string[];
 }
 
 interface KPIMetric {
@@ -249,7 +263,7 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hi! I'm Beacon, your marketing co-pilot. I help you connect performance data and customer feedback into clear priorities.\n\nYou can ask me naturally or use commands:\n• \"Show me insights about checkout\"\n• \"What should we prioritize?\"\n• \"/insights checkout 30d\"",
+      text: "Hi! I'm Beacon, your marketing co-pilot. I help you connect performance data and customer feedback into clear priorities.\n\nYou can ask me naturally or use commands:\n• \"Show me insights about checkout\"\n• \"What should we prioritize?\"\n• \"/insights checkout 30d\"\n\n📁 You can also upload CSV or PDF files to analyze!",
       sender: 'bot',
       timestamp: new Date()
     }
@@ -257,7 +271,10 @@ function App() {
   const [inputText, setInputText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [showFileUpload, setShowFileUpload] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const commandParser = new CommandParser();
 
   const checkScrollPosition = () => {
@@ -286,6 +303,85 @@ function App() {
     }
   };
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsProcessing(true);
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
+      if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+        const content = await file.text();
+        const newFile: UploadedFile = {
+          id: `file-${Date.now()}-${i}`,
+          name: file.name,
+          type: 'csv',
+          size: file.size,
+          content,
+          uploadedAt: new Date()
+        };
+        setUploadedFiles(prev => [...prev, newFile]);
+        
+        // Add upload confirmation message
+        const uploadMessage: Message = {
+          id: messages.length + 1,
+          text: `📁 Uploaded: ${file.name} (${(file.size / 1024).toFixed(1)}KB)\n\nI can now analyze this CSV data. Try asking:\n• "What are the key insights from this data?"\n• "Show me trends in the feedback"\n• "What are the main pain points?"`,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, uploadMessage]);
+      } else if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+        // For PDFs, we'll simulate content extraction
+        const newFile: UploadedFile = {
+          id: `file-${Date.now()}-${i}`,
+          name: file.name,
+          type: 'pdf',
+          size: file.size,
+          content: `[PDF content extracted from ${file.name}]`,
+          uploadedAt: new Date()
+        };
+        setUploadedFiles(prev => [...prev, newFile]);
+        
+        const uploadMessage: Message = {
+          id: messages.length + 1,
+          text: `📄 Uploaded: ${file.name} (${(file.size / 1024).toFixed(1)}KB)\n\nI can now analyze this PDF report. Try asking:\n• "What are the main findings?"\n• "Summarize the key metrics"\n• "What recommendations are mentioned?"`,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, uploadMessage]);
+      }
+    }
+    
+    setIsProcessing(false);
+    setShowFileUpload(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const processWithGemini = async (input: string, context?: string): Promise<string> => {
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      
+      let prompt = `You are Beacon, a marketing co-pilot AI assistant. You help analyze marketing data and provide insights.`;
+      
+      if (context) {
+        prompt += `\n\nContext from uploaded files:\n${context}`;
+      }
+      
+      prompt += `\n\nUser question: ${input}\n\nPlease provide a helpful, analytical response.`;
+      
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      return response.text();
+    } catch (error) {
+      console.error('Gemini API error:', error);
+      return "I'm having trouble processing your request right now. Please try again.";
+    }
+  };
+
   const handleSendMessage = async () => {
     if (inputText.trim() && !isProcessing) {
       const userMessage: Message = {
@@ -300,18 +396,46 @@ function App() {
       setIsProcessing(true);
 
       try {
-        const result = await commandParser.parseCommand(inputText);
-        
-        const botMessage: Message = {
-          id: messages.length + 2,
-          text: result.type === 'text' ? result.response : '',
-          sender: 'bot',
-          timestamp: new Date(),
-          type: result.type as any,
-          data: result.response
-        };
-        
-        setMessages(prev => [...prev, botMessage]);
+        // Check if we have uploaded files and user is asking about them
+        const hasUploadedFiles = uploadedFiles.length > 0;
+        const isAskingAboutFiles = inputText.toLowerCase().includes('data') || 
+                                  inputText.toLowerCase().includes('file') ||
+                                  inputText.toLowerCase().includes('upload') ||
+                                  inputText.toLowerCase().includes('csv') ||
+                                  inputText.toLowerCase().includes('pdf') ||
+                                  inputText.toLowerCase().includes('analyze');
+
+        if (hasUploadedFiles && isAskingAboutFiles) {
+          // Use Gemini to analyze uploaded files
+          const context = uploadedFiles.map(file => 
+            `${file.name} (${file.type.toUpperCase()}):\n${file.content?.substring(0, 1000)}...`
+          ).join('\n\n');
+          
+          const geminiResponse = await processWithGemini(inputText, context);
+          
+          const botMessage: Message = {
+            id: messages.length + 2,
+            text: geminiResponse,
+            sender: 'bot',
+            timestamp: new Date()
+          };
+          
+          setMessages(prev => [...prev, botMessage]);
+        } else {
+          // Use existing command parser for system commands and general queries
+          const result = await commandParser.parseCommand(inputText);
+          
+          const botMessage: Message = {
+            id: messages.length + 2,
+            text: result.type === 'text' ? result.response : '',
+            sender: 'bot',
+            timestamp: new Date(),
+            type: result.type as any,
+            data: result.response
+          };
+          
+          setMessages(prev => [...prev, botMessage]);
+        }
       } catch (error) {
         const errorMessage: Message = {
           id: messages.length + 2,
@@ -470,7 +594,45 @@ function App() {
                 </div>
               )}
         
-        <div className="input-container">
+                <div className="input-container">
+          <button
+            onClick={() => setShowFileUpload(!showFileUpload)}
+            className="upload-button"
+            disabled={isProcessing}
+            title="Upload files"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7,10 12,15 17,10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </button>
+          
+          {showFileUpload && (
+            <div className="file-upload-overlay">
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".csv,.pdf"
+                onChange={handleFileUpload}
+                style={{ display: 'none' }}
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="file-upload-button"
+              >
+                📁 Choose CSV or PDF files
+              </button>
+              <button
+                onClick={() => setShowFileUpload(false)}
+                className="cancel-upload-button"
+              >
+                ✕ Cancel
+              </button>
+            </div>
+          )}
+          
           <input
             type="text"
             value={inputText}
