@@ -21,7 +21,7 @@ A simple, modern chat interface built with React and TypeScript.
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/thejoseplatero/beacon.git
 cd beacon
 ```
 
