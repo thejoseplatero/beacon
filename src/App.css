@@ -41,6 +41,31 @@
   text-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
   transition: all 0.3s ease;
   cursor: pointer;
+  position: relative;
+}
+
+.beacon-logo::before,
+.beacon-logo::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(6, 182, 212, 0.2) 50%, transparent 70%);
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.beacon-logo:hover::before {
+  animation: beaconPulse1 2s ease-out infinite;
+}
+
+.beacon-logo:hover::after {
+  animation: beaconPulse2 2s ease-out infinite 0.5s;
 }
 
 @keyframes subtleShimmer {
@@ -49,6 +74,28 @@
   }
   50% {
     background-position: 100% 50%;
+  }
+}
+
+@keyframes beaconPulse1 {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3);
+    opacity: 0;
+  }
+}
+
+@keyframes beaconPulse2 {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
   }
 }
 
