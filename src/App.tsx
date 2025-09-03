@@ -372,12 +372,13 @@ function App() {
 
   return (
     <div className="App">
-      <div className="chat-container">
-        <div className="chat-header">
-          <h1>Beacon</h1>
-          <p>Marketing Co-Pilot</p>
+      <div className="app-header">
+        <div className="logo-container">
+          <h1 className="beacon-logo">beacon</h1>
         </div>
-        
+      </div>
+      
+      <div className="chat-container">
         <div className="messages-container">
           {messages.map((message) => (
             <div 
