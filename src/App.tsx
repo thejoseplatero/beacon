@@ -1,13 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import * as pdfjsLib from 'pdfjs-dist';
 import './App.css';
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY || 'your-api-key-here');
-
-// Initialize PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 // Data Models
 interface UploadedFile {
@@ -364,48 +360,24 @@ function App() {
         };
         setMessages(prev => [...prev, uploadMessage]);
       } else if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
-        try {
-          // Extract text from PDF using PDF.js
-          const arrayBuffer = await file.arrayBuffer();
-          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-          let fullText = '';
-          
-          for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-            const page = await pdf.getPage(pageNum);
-            const textContent = await page.getTextContent();
-            const pageText = textContent.items
-              .map((item: any) => item.str)
-              .join(' ');
-            fullText += pageText + '\n';
-          }
-          
-          const newFile: UploadedFile = {
-            id: `file-${Date.now()}-${i}`,
-            name: file.name,
-            type: 'pdf',
-            size: file.size,
-            content: fullText,
-            uploadedAt: new Date()
-          };
-          setUploadedFiles(prev => [...prev, newFile]);
-          
-          const uploadMessage: Message = {
-            id: messages.length + 1,
-            text: `📄 Uploaded: ${file.name} (${(file.size / 1024).toFixed(1)}KB)\n\nI can now analyze this PDF report. Try asking:\n• "What are the main findings?"\n• "Summarize the key metrics"\n• "What recommendations are mentioned?"`,
-            sender: 'bot',
-            timestamp: new Date()
-          };
-          setMessages(prev => [...prev, uploadMessage]);
-        } catch (error) {
-          console.error('PDF processing error:', error);
-          const errorMessage: Message = {
-            id: messages.length + 1,
-            text: `❌ Error processing PDF: ${file.name}. Please try again or upload a different file.`,
-            sender: 'bot',
-            timestamp: new Date()
-          };
-          setMessages(prev => [...prev, errorMessage]);
-        }
+        // Store PDF file for Gemini to process directly
+        const newFile: UploadedFile = {
+          id: `file-${Date.now()}-${i}`,
+          name: file.name,
+          type: 'pdf',
+          size: file.size,
+          content: `[PDF file: ${file.name}]`,
+          uploadedAt: new Date()
+        };
+        setUploadedFiles(prev => [...prev, newFile]);
+        
+        const uploadMessage: Message = {
+          id: messages.length + 1,
+          text: `📄 Uploaded: ${file.name} (${(file.size / 1024).toFixed(1)}KB)\n\nI can now analyze this PDF report. Try asking:\n• "What are the main findings?"\n• "Summarize the key metrics"\n• "What recommendations are mentioned?"`,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, uploadMessage]);
       }
     }
     
@@ -416,17 +388,24 @@ function App() {
     }
   };
 
-  const processWithGemini = async (input: string, context?: string): Promise<string> => {
+  const processWithGemini = async (input: string, files?: UploadedFile[]): Promise<string> => {
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-pro" });
       
       let prompt = `You are Beacon, a marketing co-pilot AI assistant. You help analyze marketing data and provide insights.`;
       
-      if (context) {
-        prompt += `\n\nContext from uploaded files:\n${context}`;
+      if (files && files.length > 0) {
+        prompt += `\n\nYou have access to the following uploaded files:\n`;
+        for (const file of files) {
+          if (file.type === 'csv') {
+            prompt += `\nCSV File: ${file.name}\nContent:\n${file.content}\n`;
+          } else if (file.type === 'pdf') {
+            prompt += `\nPDF File: ${file.name} - Please analyze this PDF document.\n`;
+          }
+        }
       }
       
-      prompt += `\n\nUser question: ${input}\n\nPlease provide a helpful, analytical response.`;
+      prompt += `\n\nUser question: ${input}\n\nPlease provide a helpful, analytical response based on the available data.`;
       
       const result = await model.generateContent(prompt);
       const response = await result.response;
@@ -462,11 +441,7 @@ function App() {
 
         if (hasUploadedFiles && isAskingAboutFiles) {
           // Use Gemini to analyze uploaded files
-          const context = uploadedFiles.map(file => 
-            `${file.name} (${file.type.toUpperCase()}):\n${file.content?.substring(0, 1000)}...`
-          ).join('\n\n');
-          
-          const geminiResponse = await processWithGemini(inputText, context);
+          const geminiResponse = await processWithGemini(inputText, uploadedFiles);
           
           const botMessage: Message = {
             id: messages.length + 2,
