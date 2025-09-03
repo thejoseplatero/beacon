@@ -374,7 +374,7 @@ function App() {
     <div className="App">
       <div className="app-header">
         <div className="logo-container">
-          <h1 className="beacon-logo">beacon</h1>
+          <h1 className="beacon-logo">neojack:beacon</h1>
         </div>
       </div>
       
