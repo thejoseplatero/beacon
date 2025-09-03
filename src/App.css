@@ -11,13 +11,14 @@
 
 .app-header {
   height: 60px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 20px;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
 }
 
 .logo-container {
@@ -37,6 +38,7 @@
   background-clip: text;
   animation: shimmer 3s ease-in-out infinite, pulse 4s ease-in-out infinite;
   letter-spacing: -0.5px;
+  text-shadow: 0 0 30px rgba(0, 212, 170, 0.3);
 }
 
 @keyframes shimmer {
@@ -64,14 +66,45 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  background: white;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 249, 250, 0.95) 100%);
+  backdrop-filter: blur(10px);
   border-radius: 20px 20px 0 0;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   margin-top: 20px;
   margin-bottom: 20px;
+  position: relative;
+}
+
+.chat-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 20px 20px 0 0;
+  padding: 2px;
+  background: linear-gradient(135deg, #00d4aa, #667eea, #764ba2, #00d4aa);
+  background-size: 400% 400%;
+  animation: borderShimmer 6s ease-in-out infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+@keyframes borderShimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .messages-container {
