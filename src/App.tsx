@@ -12,6 +12,7 @@ interface UploadedFile {
   type: 'csv' | 'pdf';
   size: number;
   content?: string;
+  file?: File;
   uploadedAt: Date;
 }
 
@@ -347,6 +348,7 @@ function App() {
           type: 'csv',
           size: file.size,
           content,
+          file,
           uploadedAt: new Date()
         };
         setUploadedFiles(prev => [...prev, newFile]);
@@ -367,6 +369,7 @@ function App() {
           type: 'pdf',
           size: file.size,
           content: `[PDF file: ${file.name}]`,
+          file,
           uploadedAt: new Date()
         };
         setUploadedFiles(prev => [...prev, newFile]);
@@ -416,6 +419,43 @@ function App() {
     }
   };
 
+  const processWithGeminiFiles = async (input: string, files?: UploadedFile[]): Promise<string> => {
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      
+      let prompt = `You are Beacon, a marketing co-pilot AI assistant. You help analyze marketing data and provide insights.`;
+      prompt += `\n\nUser question: ${input}\n\nPlease provide a helpful, analytical response based on the uploaded files.`;
+      
+      // Create parts array for Gemini with text and files
+      const parts: any[] = [{ text: prompt }];
+      
+      if (files && files.length > 0) {
+        for (const file of files) {
+          if (file.file) {
+            // Convert file to base64 for Gemini
+            const arrayBuffer = await file.file.arrayBuffer();
+            const uint8Array = new Uint8Array(arrayBuffer);
+            const base64 = btoa(String.fromCharCode.apply(null, Array.from(uint8Array)));
+            
+            parts.push({
+              inlineData: {
+                data: base64,
+                mimeType: file.type === 'pdf' ? 'application/pdf' : 'text/csv'
+              }
+            });
+          }
+        }
+      }
+      
+      const result = await model.generateContent(parts);
+      const response = await result.response;
+      return response.text();
+    } catch (error) {
+      console.error('Gemini API error:', error);
+      return "I'm having trouble processing your request right now. Please try again.";
+    }
+  };
+
   const handleSendMessage = async () => {
     if (inputText.trim() && !isProcessing) {
       const userMessage: Message = {
@@ -441,7 +481,7 @@ function App() {
 
         if (hasUploadedFiles && isAskingAboutFiles) {
           // Use Gemini to analyze uploaded files
-          const geminiResponse = await processWithGemini(inputText, uploadedFiles);
+          const geminiResponse = await processWithGeminiFiles(inputText, uploadedFiles);
           
           const botMessage: Message = {
             id: messages.length + 2,
