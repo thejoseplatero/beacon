@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import * as pdfjsLib from 'pdfjs-dist';
 import './App.css';
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY || 'your-api-key-here');
+
+// Initialize PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 // Data Models
 interface UploadedFile {
@@ -273,6 +277,7 @@ function App() {
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [showFileUpload, setShowFileUpload] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const commandParser = new CommandParser();
@@ -306,7 +311,33 @@ function App() {
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
+    await processFiles(Array.from(files));
+  };
 
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = async (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragOver(false);
+    
+    const files = Array.from(event.dataTransfer.files);
+    if (files.length > 0) {
+      await processFiles(files);
+    }
+  };
+
+  const processFiles = async (files: File[]) => {
     setIsProcessing(true);
     
     for (let i = 0; i < files.length; i++) {
@@ -333,24 +364,48 @@ function App() {
         };
         setMessages(prev => [...prev, uploadMessage]);
       } else if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
-        // For PDFs, we'll simulate content extraction
-        const newFile: UploadedFile = {
-          id: `file-${Date.now()}-${i}`,
-          name: file.name,
-          type: 'pdf',
-          size: file.size,
-          content: `[PDF content extracted from ${file.name}]`,
-          uploadedAt: new Date()
-        };
-        setUploadedFiles(prev => [...prev, newFile]);
-        
-        const uploadMessage: Message = {
-          id: messages.length + 1,
-          text: `📄 Uploaded: ${file.name} (${(file.size / 1024).toFixed(1)}KB)\n\nI can now analyze this PDF report. Try asking:\n• "What are the main findings?"\n• "Summarize the key metrics"\n• "What recommendations are mentioned?"`,
-          sender: 'bot',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, uploadMessage]);
+        try {
+          // Extract text from PDF using PDF.js
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          let fullText = '';
+          
+          for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            const page = await pdf.getPage(pageNum);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items
+              .map((item: any) => item.str)
+              .join(' ');
+            fullText += pageText + '\n';
+          }
+          
+          const newFile: UploadedFile = {
+            id: `file-${Date.now()}-${i}`,
+            name: file.name,
+            type: 'pdf',
+            size: file.size,
+            content: fullText,
+            uploadedAt: new Date()
+          };
+          setUploadedFiles(prev => [...prev, newFile]);
+          
+          const uploadMessage: Message = {
+            id: messages.length + 1,
+            text: `📄 Uploaded: ${file.name} (${(file.size / 1024).toFixed(1)}KB)\n\nI can now analyze this PDF report. Try asking:\n• "What are the main findings?"\n• "Summarize the key metrics"\n• "What recommendations are mentioned?"`,
+            sender: 'bot',
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, uploadMessage]);
+        } catch (error) {
+          console.error('PDF processing error:', error);
+          const errorMessage: Message = {
+            id: messages.length + 1,
+            text: `❌ Error processing PDF: ${file.name}. Please try again or upload a different file.`,
+            sender: 'bot',
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, errorMessage]);
+        }
       }
     }
     
@@ -562,7 +617,11 @@ function App() {
         </div>
       </div>
       
-                  <div className="chat-container">
+                  <div className={`chat-container ${isDragOver ? 'drag-over' : ''}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
               <div className="messages-container" ref={messagesContainerRef}>
                 {messages.map((message) => (
                   <div
