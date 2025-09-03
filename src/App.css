@@ -192,7 +192,7 @@
 
 .message {
   display: flex;
-  margin-bottom: 10px;
+  margin-bottom: 4px;
 }
 
 .user-message {
@@ -201,6 +201,7 @@
 
 .bot-message {
   justify-content: flex-start;
+  margin: 2px 0;
 }
 
 .message-content {
@@ -221,14 +222,14 @@
 }
 
 .bot-message .message-content {
-  background: rgba(31, 41, 55, 0.6);
+  background: none;
   color: #ffffff;
-  border-bottom-left-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   font-size: 0.9rem;
   line-height: 1.6;
   font-weight: 400;
   border: none;
+  box-shadow: none;
+  padding: 8px 0;
 }
 
 .message-content p {
@@ -239,10 +240,7 @@
 }
 
 .timestamp {
-  font-size: 0.7rem;
-  opacity: 0.7;
-  display: block;
-  margin-top: 4px;
+  display: none;
 }
 
 .loading {
