@@ -7,6 +7,7 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
+  overflow: hidden;
 }
 
 .app-header {
@@ -166,6 +167,8 @@
   margin-top: 20px;
   margin-bottom: 20px;
   position: relative;
+  min-height: 0;
+  height: calc(100vh - 120px);
 }
 
 .chat-container::before {
@@ -192,6 +195,8 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  min-height: 0;
+  height: 100%;
 }
 
 .message {
