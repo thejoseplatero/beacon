@@ -217,18 +217,20 @@
 }
 
 .bot-message .message-content {
-  background: rgba(55, 65, 81, 0.9);
-  color: #f3f4f6;
+  background: rgba(31, 41, 55, 0.95);
+  color: #ffffff;
   border-bottom-left-radius: 4px;
-  border: 1px solid rgba(147, 51, 234, 0.2);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  font-size: 0.95rem;
-  line-height: 1.6;
+  border: 1px solid rgba(147, 51, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  font-size: 1rem;
+  line-height: 1.7;
+  font-weight: 400;
 }
 
 .message-content p {
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.7;
+  color: #ffffff;
 }
 
 .timestamp {
@@ -296,73 +298,85 @@
 
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
-  margin: 12px 0;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+  width: 100%;
 }
 
 .kpi-item {
-  background: #f8f9fa;
-  padding: 8px 12px;
+  background: rgba(31, 41, 55, 0.9);
+  padding: 12px 16px;
   border-radius: 8px;
-  border-left: 3px solid #667eea;
+  border-left: 3px solid #a855f7;
+  color: #ffffff;
 }
 
 .kpi-name {
   display: block;
-  font-size: 0.8rem;
-  color: #666;
+  font-size: 0.9rem;
+  color: #e5e7eb;
   font-weight: 500;
 }
 
 .kpi-value {
   display: block;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  margin-top: 2px;
+  margin-top: 4px;
+  color: #ffffff;
 }
 
 .kpi-value.positive {
-  color: #28a745;
+  color: #10b981;
 }
 
 .kpi-value.negative {
-  color: #dc3545;
+  color: #ef4444;
 }
 
 .verbatims {
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid #e9ecef;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(147, 51, 234, 0.3);
 }
 
 .verbatims h4 {
-  margin: 0 0 8px 0;
-  font-size: 0.9rem;
-  color: #333;
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  color: #ffffff;
+  font-weight: 600;
 }
 
 .verbatim {
-  margin: 4px 0;
-  font-size: 0.85rem;
-  color: #666;
+  margin: 6px 0;
+  font-size: 0.95rem;
+  color: #e5e7eb;
   font-style: italic;
+  line-height: 1.5;
 }
 
 /* Opportunity Card Styles */
+.opportunities-list {
+  width: 100%;
+}
+
 .opportunities-list h3 {
   margin: 0 0 16px 0;
-  color: #333;
+  color: #ffffff;
   font-size: 1.3rem;
+  font-weight: 600;
 }
 
 .opportunity-card {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background: rgba(31, 41, 55, 0.9);
+  border: 1px solid rgba(147, 51, 234, 0.3);
   border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
   text-align: left;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  color: #ffffff;
 }
 
 .opp-header {
@@ -374,16 +388,24 @@
 
 .opp-header h4 {
   margin: 0;
-  color: #333;
+  color: #ffffff;
   font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.opp-header p {
+  margin: 8px 0;
+  color: #e5e7eb;
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
 .score {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #a855f7 0%, #8b5cf6 100%);
   color: white;
-  padding: 4px 8px;
+  padding: 6px 12px;
   border-radius: 6px;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
 }
 
@@ -395,12 +417,12 @@
 }
 
 .metric {
-  background: white;
-  padding: 4px 8px;
+  background: rgba(55, 65, 81, 0.8);
+  padding: 6px 10px;
   border-radius: 6px;
-  font-size: 0.8rem;
-  color: #666;
-  border: 1px solid #e9ecef;
+  font-size: 0.85rem;
+  color: #ffffff;
+  border: 1px solid rgba(147, 51, 234, 0.2);
 }
 
 .evidence {
@@ -408,8 +430,9 @@
 }
 
 .evidence strong {
-  color: #333;
+  color: #ffffff;
   font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .evidence ul {
@@ -418,9 +441,10 @@
 }
 
 .evidence li {
-  font-size: 0.85rem;
-  color: #666;
-  margin: 2px 0;
+  font-size: 0.9rem;
+  color: #e5e7eb;
+  margin: 4px 0;
+  line-height: 1.5;
 }
 
 /* Decision Card Styles */
