@@ -32,46 +32,13 @@
   font-size: 1.2rem;
   font-weight: 700;
   background: linear-gradient(135deg, #a855f7 0%, #8b5cf6 25%, #06b6d4 50%, #10b981 75%, #f59e0b 100%);
-  background-size: 300% 300%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: shimmer 4s ease-in-out infinite, glint 6s ease-in-out infinite;
   letter-spacing: -0.5px;
   text-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
   transition: all 0.3s ease;
   cursor: pointer;
-  position: relative;
-}
-
-.beacon-logo::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  animation: glint 6s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes shimmer {
-  0%, 100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-}
-
-@keyframes glint {
-  0%, 100% {
-    left: -100%;
-  }
-  50% {
-    left: 100%;
-  }
 }
 
 .beacon-logo:hover {
