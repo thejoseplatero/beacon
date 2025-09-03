@@ -71,7 +71,8 @@
   border-radius: 20px 20px 0 0;
   box-shadow: 
     0 20px 40px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(147, 51, 234, 0.1) inset;
+    0 0 0 1px rgba(147, 51, 234, 0.05) inset,
+    0 0 30px rgba(168, 85, 247, 0.1);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -88,8 +89,8 @@
   right: 0;
   bottom: 0;
   border-radius: 20px 20px 0 0;
-  padding: 2px;
-  background: linear-gradient(135deg, #a855f7, #8b5cf6, #7c3aed, #a855f7);
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(139, 92, 246, 0.2), rgba(124, 58, 237, 0.3), rgba(168, 85, 247, 0.3));
   background-size: 400% 400%;
   animation: borderShimmer 6s ease-in-out infinite;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
